@@ -43,7 +43,6 @@ void edit_line(char* buffer, int current_line) {
         return;
     }
 
-
     // By the end of the loop, `buffer` points to the first character
     // of `current_line`.
     for (int i = 1; i < current_line; i++) {
@@ -98,9 +97,15 @@ int main(int argc, char** argv) {
 
     edit_line(buffer, current_line);
 
+    // Write the changed buffer to file.
     f = fopen(argv[1], "w");
     fwrite(buffer, strlen(buffer), 1, f);
     fclose(f);
+
+    // On success, print out changes.
+    printf("\n---------- CONTENTS AFTER EDIT -----------\n");
+    printf("%s\n", buffer);
+    printf("------------------------------------------\n\n");
 
     return 0;
 }
