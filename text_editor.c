@@ -23,7 +23,27 @@ void get_replacement_line(char* buffer) {
     }
 }
 
+size_t get_total_lines(char* buffer) {
+    size_t lines = 0;
+    const char* ptr = buffer;
+
+    while (*ptr != '\0') {
+        if (*ptr == '\n') {
+            lines++;
+        }
+        ptr++;
+    }
+
+    return lines;
+}
+
 void edit_line(char* buffer, int current_line) {
+    if (current_line <= 0 || current_line > get_total_lines(buffer)) {
+        printf("Invalid line number. Please enter a valid line number.\n");
+        return;
+    }
+
+
     // By the end of the loop, `buffer` points to the first character
     // of `current_line`.
     for (int i = 1; i < current_line; i++) {
