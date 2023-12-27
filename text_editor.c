@@ -3,13 +3,27 @@
  * @author Antriksh Dhand (base code from Nir Lichtman)
  * @brief An improved version of Nir Lichtman's "Minimal Text Editor in C".
  * @date 2023-12-28
+ * 
+ * Future improvements:
+ *   - Dynamically allocate memory based on the input file size.
+ *   - Use fgets() instead of scanf(). 
  */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 #define MAX_BUF 1024
+
+FILE* open_file(const char* filename, const char* mode) {
+    FILE* file = fopen(filename, mode);
+    if (!file) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+    return file;
+}
 
 void get_replacement_line(char* buffer) {
     printf("Please enter replacement string: ");
@@ -23,7 +37,7 @@ void get_replacement_line(char* buffer) {
     }
 }
 
-size_t get_total_lines(char* buffer) {
+size_t count_total_lines(char* buffer) {
     size_t lines = 0;
     const char* ptr = buffer;
 
@@ -38,7 +52,7 @@ size_t get_total_lines(char* buffer) {
 }
 
 void edit_line(char* buffer, int current_line) {
-    if (current_line <= 0 || current_line > get_total_lines(buffer)) {
+    if (current_line <= 0 || current_line > count_total_lines(buffer)) {
         printf("Invalid line number. Please enter a valid line number.\n");
         return;
     }
@@ -72,13 +86,13 @@ void edit_line(char* buffer, int current_line) {
 int main(int argc, char** argv) {
     if (argc != 2) {
         printf("Usage: ./text-editor file_to_edit.txt\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     char buffer[MAX_BUF] = {0};
 
     // Open and read the entire file into buffer.
-    FILE* f = fopen(argv[1], "r");
+    FILE* f = open_file(argv[1], "r");
     fread(buffer, MAX_BUF, 1, f);
     fclose(f);
 
@@ -92,14 +106,18 @@ int main(int argc, char** argv) {
     if (scanf("%d", &current_line) != 1) {
         // Input was not a valid integer
         printf("Invalid input. Please enter a valid line number.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     edit_line(buffer, current_line);
 
     // Write the changed buffer to file.
-    f = fopen(argv[1], "w");
-    fwrite(buffer, strlen(buffer), 1, f);
+    f = openFile(argv[1], "w");
+    if (fwrite(buffer, strlen(buffer), 1, f) != 1) {
+        perror("Error writing to file");
+        fclose(f);
+        exit(EXIT_FAILURE);
+    }
     fclose(f);
 
     // On success, print out changes.
